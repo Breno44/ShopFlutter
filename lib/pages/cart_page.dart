@@ -5,8 +5,15 @@ import 'package:shop/models/order_list.dart';
 import '../components/cart_item.dart';
 import '../models/cart.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,22 +56,32 @@ class CartPage extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    onPressed: () {
-                      Provider.of<OrderList>(
-                        context,
-                        listen: false,
-                      ).addOrder(cart);
+                  _isLoading
+                      ? CircularProgressIndicator()
+                      : TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          onPressed: cart.itemsCount == 0
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  await Provider.of<OrderList>(
+                                    context,
+                                    listen: false,
+                                  ).addOrder(cart);
 
-                      cart.clear();
-                    },
-                    child: const Text('COMPRAR'),
-                  ),
+                                  cart.clear();
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                },
+                          child: const Text('COMPRAR'),
+                        ),
                 ],
               ),
             ),
